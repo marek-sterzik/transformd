@@ -248,3 +248,25 @@ table td, table th {
     background-color: #ffffff;
 
 }
+
+div.foot .home {
+    float: left;
+    display: block;
+}
+
+div.foot .powered {
+    float: right;
+    display: block;
+    color: #888;
+}
+
+div.foot .powered a {
+    color: #666;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+div.foot .clear {
+    clear: both;
+}
+
