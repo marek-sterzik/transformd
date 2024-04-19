@@ -1,0 +1,15 @@
+#!/bin/bash
+
+app_bin="transformd.phar"
+app_bin_real="transformd.php"
+
+cd "`dirname "$0"`/.."
+
+(cd style; make)
+(cd source; composer install)
+
+rm -f "$app_bin"
+
+php -d phar.readonly=0 bin/create-archive
+
+mv "$app_bin" "$app_bin_real"

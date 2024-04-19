@@ -1,0 +1,8 @@
+RewriteEngine On
+
+RewriteCond %{REQUEST_FILENAME} -f 
+RewriteCond %{REQUEST_FILENAME} \.md$
+
+RewriteRule ^(.*)$ transformd.php [QSA,L]
+
+

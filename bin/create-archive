@@ -1,0 +1,35 @@
+<?php
+
+$workdir = dirname(__DIR__);
+$stub = <<<'ENDSTUB'
+<?php
+
+$web = 'index.php';
+Phar::interceptFileFuncs();
+set_include_path('phar://' . __FILE__ . PATH_SEPARATOR . get_include_path());
+define('TRANSFORMD_PHAR_DIR', __DIR__);
+include 'phar://' . __FILE__ . '/' . $web;
+return;
+
+__HALT_COMPILER(); ?>
+ENDSTUB;
+
+try {
+    // Create a new Phar object
+    $phar = new Phar($workdir . '/transformd.phar', 0);
+
+    // Add files to the archive
+    $phar->buildFromDirectory($workdir . '/source');
+
+    // Set the default stub file
+    //$defaultStub = $phar->createDefaultStub('index.php');
+    $phar->setStub($stub);
+
+    // Save the archive
+    $phar->stopBuffering();
+} catch (Exception $e) {
+    fprintf(STDERR, "Error: %s\n", $e->getMessage());
+    exit (1);
+}
+
+exit(0);
