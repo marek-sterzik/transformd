@@ -13,6 +13,8 @@ class ConfigReader
         "index-file" => "path|null",
         "home" => "path|null",
         "home-caption" => "string|null",
+        "assets" => "filelist",
+        "templates" => "filelist",
     ];
 
 
@@ -110,7 +112,7 @@ class ConfigReader
     private function doCheckValue(&$value, string $checkers): bool
     {
         if ($checkers === "") {
-            $chekcers = [];
+            $checkers = [];
         } else {
             $checkers = explode("|", $checkers);
         }
@@ -138,5 +140,95 @@ class ConfigReader
     private function checkPath(&$value): bool
     {
         return is_string($value);
+    }
+
+    private function checkFilelist(&$value): bool
+    {
+        if (!is_array($value)) {
+            return false;
+        }
+        foreach (array_keys($value) as $key) {
+            if (!$this->checkFileContent($value[$key])) {
+                unset($value[$key]);
+            }
+        }
+        return true;
+    }
+
+    private function checkFileContent(&$value): bool
+    {
+        if (is_string($value)) {
+            $val2 = ltrim($value);
+            if (strlen($val2) === strlen("null") && strtolower($val2) === "null") {
+                $value = null;
+                unset($val2);
+            }
+        }
+        if ($value === null) {
+            $value = ["type" => "null", "data" => null];
+        }
+        if (is_string($value)) {
+            $pos = strpos($value, ":");
+            $type = null;
+            if ($pos !== null) {
+                $type = strtolower(ltrim(substr($value, 0, $pos)));
+                if (!preg_match('/^[a-z_]+$/', $type)) {
+                    $type = null;
+                }
+            }
+            if ($type === null) {
+                $data = $value;
+            } else {
+                $data = substr($value, $pos + 1);
+            }
+            $value = ["type" => $type, "data" => $data];
+        }
+
+        if (!is_array($value)) {
+            return false;
+        }
+        if (!array_key_exists('type', $value) || !is_string($value['type'])) {
+            return false;
+        }
+        $value['type'] = strtolower($value['type']);
+
+        if ($value['type'] !== 'null' && !array_key_exists('data', $value)) {
+            return false;
+        }
+        if (!array_key_exists('data', $value)) {
+            $value['data'] = null;
+        }
+        if (!is_string($value['data']) && $value['data'] !== null) {
+            return false;
+        }
+        if ($value['data'] === null && $value['type'] !== 'null') {
+            return false;
+        }
+        if (count($value) > 2) {
+            $value = ["type" => $value["type"], "data" => $value["data"]];
+        }
+        if ($value['type'] === 'data' || $value['type'] === 'd') {
+            $value['type'] = 'data';
+        } elseif($value['type'] === 'file' || $value['type'] === 'f') {
+            $value['type'] = 'file';
+            $value['data'] = $this->resolveRelativePath($value['data']);
+            if ($value['data'] === null) {
+                return false;
+            }
+            if (!file_exists($value['data'])) {
+                return false;
+            }
+        } elseif($value['type'] === 'null') {
+            return true;
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    private function resolveRelativePath(string $path): string
+    {
+        //TODO implement relative path resolving
+        return $path;
     }
 }

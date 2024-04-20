@@ -29,6 +29,16 @@ class Config
         return $this->getValue("home-caption", "home");
     }
 
+    public function getFile(string $set, string $name): ?array
+    {
+        if (!in_array($set, ["assets", "templates"])) {
+            return null;
+        }
+        $files = $this->getValue($set, []);
+        $descriptor = $files[$name] ?? null;
+        return $descriptor;
+    }
+
     public function getTemplateVars(): array
     {
         $homeUrl = $this->getHomeUrl();

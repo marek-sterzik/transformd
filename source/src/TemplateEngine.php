@@ -63,9 +63,33 @@ class TemplateEngine
         @include $this->defaultTemplateDir . "/" . $__tpl_args__ . ".php";
     }
 
+    private function assetExists(string $assetFile): bool
+    {
+        $fileDescriptor = $this->config->getFile("assets", $assetFile);
+        if ($fileDescriptor === null) {
+            return file_exists($this->assetDir . "/" . $assetFile);
+        } elseif ($fileDescriptor['type'] === 'file') {
+            return file_exists($fileDescriptor['data']);
+        } elseif ($fileDescriptor['type'] === 'data') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private function asset(string $assetFile, string $mime): string
     {
-        return "data:" . $mime . ";base64," . base64_encode(file_get_contents($this->assetDir . "/" . $assetFile));
+        $fileDescriptor = $this->config->getFile("assets", $assetFile);
+        if ($fileDescriptor === null) {
+            $content = file_get_contents($this->assetDir . "/" . $assetFile);
+        } elseif ($fileDescriptor['type'] === 'file') {
+            $content = @file_get_contents($fileDescriptor['data']);
+        } elseif ($fileDescriptor['type'] === 'data') {
+            $content = $fileDescriptor['data'];
+        } else {
+            $content = '';
+        }
+        return "data:" . $mime . ";base64," . base64_encode($content);
     }
 
     private function getCommonTemplateArgs(array $realVars): array
@@ -84,6 +108,10 @@ class TemplateEngine
             return $this->asset($file, $mime);
         };
 
+        $assetExists = function(string $file) {
+            return $this->assetExists($file);
+        };
+
         $render = function(string $template, ?array $vars = null) use ($realVars) {
             if ($vars === null) {
                 $vars = $realVars;
@@ -94,6 +122,7 @@ class TemplateEngine
         
         return array_merge($this->config->getTemplateVars(), [
             "asset" => $asset,
+            "assetExists" => $assetExists,
             "render" => $render,
         ]);
     }
