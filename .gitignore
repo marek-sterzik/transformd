@@ -1,9 +1,10 @@
 /source/vendor
-/source/style
+/source/style/highlight.css
+/source/style/markdown.js
 /transformd.php
 
-/style/highlight/highlight.js
-/style/highlight/style.css
+/style/highlight.js
+/style/style.css
 
 .swp
 .*.swp

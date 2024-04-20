@@ -1,11 +1,11 @@
-install: all
+all: js css
 
-all: highlight.make
-	mkdir -p ../source/style
-	cp highlight/style.css ../source/style/highlight.css
-	cp highlight/highlight.js ../source/style/markdown.js
-	cp css/style.css ../source/style/style.css
-	cp css/paper.jpg ../source/style/background.jpg
+download:
+	./download-resources.sh
 
-highlight.make:
-	cd highlight && make
+js:
+	(cat highlight.min.js; echo; cat init.js) > ../source/style/markdown.js
+
+css:
+	cp default.min.css ../source/style/highlight.css
+
