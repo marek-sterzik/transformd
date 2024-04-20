@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd "`dirname "$0"`/.."
+
+curl -o "source/style/highlight.min.css" https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css
+curl -o "source/style/highlight.min.js"  https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js

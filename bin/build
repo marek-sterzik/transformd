@@ -5,7 +5,6 @@ app_bin_real="transformd.php"
 
 cd "`dirname "$0"`/.."
 
-(cd style; make)
 (cd source; composer install)
 
 rm -f "$app_bin"
