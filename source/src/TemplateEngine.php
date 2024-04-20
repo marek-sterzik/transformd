@@ -39,28 +39,48 @@ class TemplateEngine
 
     public function render(string $templateName, array $vars = []): void
     {
-        $this->renderTemplateRaw($templateName, $vars);
+        $fileDescriptor = $this->config->getFile("templates", $templateName);
+        if ($fileDescriptor === null) {
+            $template = $this->defaultTemplateDir . "/" . $templateName . ".php";
+            $isFile = true;
+        } elseif ($fileDescriptor['type'] === 'file') {
+            $template = $fileDescriptor['data'];
+            $isFile = true;
+        } elseif ($fileDescriptor['type'] === 'data') {
+            $template = $fileDescriptor['data'];
+            $isFile = false;
+        } else {
+            return;
+        }
+        
+        $this->renderTemplateRaw($template, $isFile, $vars);
     }
 
-    private function renderTemplateRaw(string $templateName, array $vars): void
+    private function renderTemplateRaw(string $template, bool $isFile, array $vars): void
     {
         $vars = array_merge($this->getCommonTemplateArgs($vars), $vars);
-        $__tpl_args__ = [$templateName, $vars];
-        foreach ($__tpl_args__[1] as $var => $value) {
+        $__tpl_args__ = [$template, $isFile, $vars];
+        unset($template);
+        unset($isFile);
+        unset($vars);
+        foreach ($__tpl_args__[2] as $var => $value) {
             if ($var !== 'var' && $var !== 'value' && $var !== '__tpl_args__') {
                 $$var = $value;
             }
         }
         unset($var);
         unset($value);
-        if (array_key_exists("var", $__tpl_args__[1])) {
-            $var = $__tpl_args__[1]["var"];
+        if (array_key_exists("var", $__tpl_args__[2])) {
+            $var = $__tpl_args__[2]["var"];
         }
-        if (array_key_exists("value", $__tpl_args__[1])) {
-            $var = $__tpl_args__[1]["value"];
+        if (array_key_exists("value", $__tpl_args__[2])) {
+            $var = $__tpl_args__[2]["value"];
         }
-        $__tpl_args__ = $__tpl_args__[0];
-        @include $this->defaultTemplateDir . "/" . $__tpl_args__ . ".php";
+        if ($__tpl_args__[1]) {
+            @include $__tpl_args__[0];
+        } else {
+            eval("?>" . $__tpl_args__[0]);
+        }
     }
 
     private function assetExists(string $assetFile): bool
